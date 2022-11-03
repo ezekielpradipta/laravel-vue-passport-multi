@@ -222,6 +222,7 @@ const navigation = [
   { name: "Dashboard", to: { name: "Admin" } },
   { name: "surveys", to: { name: "Admin" } },
 ];
+
 const logoutButton = async () => {
   logout();
 };

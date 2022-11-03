@@ -36,6 +36,22 @@ const routes = [
                     isAdmin: true,
                 },
             },
+            {
+                path: "/userpage1",
+                name: "UserPage",
+                component: () => import("../views/UserPage1.vue"),
+                meta: {
+                    isUser: true,
+                },
+            },
+            {
+                path: "/adminpage1",
+                name: "AdminPage",
+                component: () => import("../views/AdminPage1.vue"),
+                meta: {
+                    isAdmin: true,
+                },
+            },
         ],
     },
 ];
