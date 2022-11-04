@@ -13,60 +13,53 @@ export default function useAuth() {
             .post("/login", data)
             .then((response) => {
                 console.log(response);
-                toaster.success(
-                    response.data.message + " " + response.data.data.name
-                );
 
-                localStorage.setItem("token", response.data.token);
-                let token = jwt_decode(response.data.token);
-                let userRole = token.user.roles[0].name;
-                if (userRole === "user") {
-                    router.push({
-                        name: "User",
-                    });
-                } else if (userRole === "admin") {
-                    router.push({
-                        name: "Admin",
-                    });
+                if (response.response) {
+                    if (response.response.status === 400) {
+                        for (const [key, value] of Object.entries(
+                            response.response.data
+                        )) {
+                            toaster.error(`${value}`);
+                        }
+                    }
+                } else {
+                    if (response.data.success === false) {
+                        toaster.error(
+                            response.data.message +
+                                ", Periksa Kembali Email/Password"
+                        );
+                    } else {
+                        if (response.data.token) {
+                            localStorage.setItem("token", response.data.token);
+                            let token = jwt_decode(response.data.token);
+                            let userRole = token.user.roles[0].name;
+                            if (userRole === "user") {
+                                router.push({
+                                    name: "User",
+                                });
+                            } else if (userRole === "admin") {
+                                router.push({
+                                    name: "Admin",
+                                });
+                            }
+                            toaster.success(response.data.message);
+                        }
+                    }
                 }
             })
             .catch((err) => {
-                if (err.response.data.errors) {
-                    for (const [key, value] of Object.entries(
-                        err.response.data.errors
-                    )) {
-                        toaster.error(`${value}`);
-                    }
-                }
+                console.log(err);
             });
     };
     const logout = async () => {
         let coba = await axiosClient.post("/logout");
-        console.log(coba);
         localStorage.removeItem("token");
         router.push({
             name: "Login",
         });
-        toaster.success(coba.data.message);
-
-        // const token = localStorage.getItem("token");
-        // console.log(token);
-        // const config = {
-        //     headers: {
-        //         "Content-type": "application/json",
-        //         Authorization: `Bearer ${token}`,
-        //     },
-        // };
-        // let coba = await axios.post(
-        //     "http://127.0.0.1:8000/api/logout",
-        //     null,
-        //     config
-        // );
-        // localStorage.removeItem("token");
-        // router.push({
-        //     name: "Login",
-        // });
-        // toaster.success(coba.data.message);
+        if (coba.data) {
+            toaster.success(coba.data.message);
+        }
     };
     return {
         login,
