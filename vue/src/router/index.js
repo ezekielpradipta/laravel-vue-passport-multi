@@ -1,5 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 import jwt_decode from "jwt-decode";
+import { createToaster } from "@meforma/vue-toaster";
+const toaster = createToaster({
+    position: "top-right",
+    duration: 3000,
+});
 const routes = [
     {
         path: "/auth",
@@ -61,33 +66,42 @@ const router = createRouter({
 });
 router.beforeEach((to, from, next) => {
     if (localStorage.token) {
-        let gtToken = localStorage.getItem("token");
-        let dcd = jwt_decode(gtToken);
-        let roles = dcd.user.roles.map((role) => role.name);
-        // var token = localStorage.getItem("token");
-        // var decoded = jwt_decode(token);
-        // var coba = Date.now() / 1000;
-        // let user = JSON.parse(localStorage.getItem("user"));
-        // let roles = user.roles.map((role) => role.name);
-        // if (decoded.exp < coba) {
-        //     toaster.error("Token Expired");
-        //     localStorage.removeItem("token");
-        //     localStorage.removeItem("user");
-        //     next({
-        //         name: "Login",
-        //     });
-        // }
-        if (to.matched.some((record) => record.meta.isGuest)) {
-            if (roles[0] === "user") {
-                next({
-                    name: "User",
-                });
-                return;
-            } else if (roles[0] === "admin") {
-                next({
-                    name: "Admin",
-                });
-                return;
+        try {
+            let gtToken = localStorage.getItem("token");
+            let dcd = jwt_decode(gtToken);
+            let roles = dcd.user.roles.map((role) => role.name);
+            // var token = localStorage.getItem("token");
+            // var decoded = jwt_decode(token);
+            // var coba = Date.now() / 1000;
+            // let user = JSON.parse(localStorage.getItem("user"));
+            // let roles = user.roles.map((role) => role.name);
+            // if (decoded.exp < coba) {
+            //     toaster.error("Token Expired");
+            //     localStorage.removeItem("token");
+            //     localStorage.removeItem("user");
+            //     next({
+            //         name: "Login",
+            //     });
+            // }
+            if (to.matched.some((record) => record.meta.isGuest)) {
+                if (roles[0] === "user") {
+                    next({
+                        name: "User",
+                    });
+                    return;
+                } else if (roles[0] === "admin") {
+                    next({
+                        name: "Admin",
+                    });
+                    return;
+                }
+            }
+        } catch (error) {
+            if (error.message === "Invalid token specified: e2 is undefined") {
+                toaster.error(
+                    "ERROR, Format Token Berubah, Anda Perlu Login Ulang"
+                );
+                localStorage.removeItem("token");
             }
         }
     }
